@@ -8,20 +8,24 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class GithubRepositoryDataCommand extends Command
 {
     protected static $defaultName = 'app:github:repo';
 
     private GithubApiService $githubService;
+    private SerializerInterface $serializer;
     private ParameterBagInterface $params;
 
     public function __construct(
         GithubApiService $githubService,
+        SerializerInterface $serializer,
         ParameterBagInterface $params
     ) {
         parent::__construct();
         $this->githubService = $githubService;
+        $this->serializer = $serializer;
         $this->params = $params;
     }
     

@@ -6,25 +6,27 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class GithubUserDataCommandTest extends KernelTestCase
+class GithubRepositoryDataCommandTest extends KernelTestCase
 {
     public function testExecute()
     {
         $kernel = static::createKernel();
         $application = new Application($kernel);
 
-        $command = $application->find('app:github:user');
+        $command = $application->find('app:github:repo');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
             'login' => 'MateuszSzwankowski',
+            'repoName' => 'tetris'
         ]);
 
         $output = $commandTester->getDisplay();
         $expectedStrings = [
-            '"name":"Mateusz Szwankowski"',
-            '"url":"https:\/\/api.github.com\/users\/MateuszSzwankowski"',
-            '"email":null',
-            '"created_at":"2018-02-27T14:04:09+00:00"',
+            '"full_name":"MateuszSzwankowski\/tetris"',
+            '"description":"Tetris clone written in Python"',
+            '"clone_url":"https:\/\/github.com\/MateuszSzwankowski\/tetris.git"',
+            '"stars":0',
+            '"created_at":"2018-03-03T01:26:12+00:00"'
         ];
 
         foreach ($expectedStrings as $expectedString) {
