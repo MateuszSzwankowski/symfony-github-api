@@ -2,12 +2,16 @@
 
 namespace App\Controller;
 
+use App\Exception\GithubAuthorizationException;
 use App\Service\GithubApiService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
+use FOS\RestBundle\View\View;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /** @Route("/api/github", name="github_api") */
-class GithubController extends AbstractController
+class GithubController extends AbstractFOSRestController
 {
     private $githubService;
 
@@ -21,20 +25,39 @@ class GithubController extends AbstractController
      * @Route("/users/{login}")
     */
     public function githubUserData(
+        Request $request,
         string $login
     ): View {
-        $dto = $this->githubService->getUserInfo($login, $_ENV['GITHUB_API_TOKEN']);
-        dump($dto);die;
+        $token = self::extractTokenFromHeader($request);
+        $dto = $this->githubService->getUserInfo($login, $token);
+
+        return $this->view($dto, Response::HTTP_OK);
     }
 
     /**
      * @Route("/repositories/{login}/{repoName}")
     */
-    public function githubRepositoryData(
+    public function githubUserRepositoryData(
+        Request $request,
         string $login,
         string $repoName
     ): View {
-        $dto = $this->githubService->getRepositoryInfo($login, $repoName, $_ENV['GITHUB_API_TOKEN']);
-        dump($dto);die;
+        $token = $this->extractTokenFromHeader($request);
+        $dto = $this->githubService->getRepositoryInfo($login, $repoName, $token);
+
+        return $this->view($dto, Response::HTTP_OK);
+    }
+
+    private function extractTokenFromHeader(Request $request): string
+    {
+        $authHeader = $request->headers->get('Authorization');
+        if (substr($authHeader, 0, 6) !== 'token ') {
+            throw new GithubAuthorizationException(
+                'GitHub token not found in authorization header',
+            );
+        }
+        $token = substr($authHeader, 6); // remove 'token '
+
+        return $token;
     }
 }

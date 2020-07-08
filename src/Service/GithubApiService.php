@@ -7,8 +7,9 @@ use App\Dto\Github\UserDto;
 use App\Exception\GithubResourceNotFoundException;
 use App\Exception\GithubAuthorizationException;
 use App\Exception\GithubConnectionException;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class GithubApiService
 {
@@ -71,11 +72,11 @@ final class GithubApiService
             throw new GithubConnectionException(self::UNKNOWN_EXCEPTION_MESSAGE);
         }
         
-        if ($statusCode === 200) {
-            return $response->getContent();
-        } else {
+        if ($statusCode !== Response::HTTP_OK) {
             $this->handleRequestException($statusCode);
         }
+
+        return $response->getContent();
     }
 
     private function prepareRequestHeaders(
@@ -86,9 +87,9 @@ final class GithubApiService
 
     private function handleRequestException(int $statusCode): void
     {
-        if ($statusCode === 401) {
+        if ($statusCode === Response::HTTP_UNAUTHORIZED) {
             throw new GithubAuthorizationException(self::TOKEN_EXCEPTION_MESSAGE);
-        } elseif ($statusCode === 404) {
+        } elseif ($statusCode === Response::HTTP_NOT_FOUND) {
             throw new GithubResourceNotFoundException(self::NOT_FOUND_EXCEPTION_MESSAGE);
         } else {
             throw new GithubConnectionException(self::UNKNOWN_EXCEPTION_MESSAGE);
