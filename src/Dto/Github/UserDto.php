@@ -6,13 +6,13 @@ class UserDto
 {
     private string $name;
     private string $url;
-    private string $email;
+    private ?string $email;
     private \DateTimeImmutable $createdAt;
 
     public function __construct(
         string $name,
         string $url,
-        string $email,
+        ?string $email,
         \DateTimeImmutable $createdAt
     ) {
         $this->name = $name;
@@ -29,7 +29,7 @@ class UserDto
         return $this->url;
     }
 
-    public function getEmail(): string {
+    public function getEmail(): ?string {
         return $this->email;
     }
 
